@@ -12,8 +12,8 @@ import com.example.financeapp.viewmodels.CurrencyViewModel
 fun AppNavHost(navController: NavHostController) {
     NavHost(navController = navController, startDestination = "currency") {
         composable("currency") {
-            val vm:CurrencyViewModel= viewModel()
-            CurrencyScreen(vm,navController) }
+                CurrencyScreen(navController = navController)
+            }
+        }
 
     }
-}
