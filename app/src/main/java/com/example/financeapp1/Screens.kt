@@ -14,114 +14,151 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.example.financeapp.viewmodels.CurrencyViewModel
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.style.TextAlign
+import com.example.financeapp.utils.isInternetAvailable
 
 @Composable
-fun CurrencyScreen(viewModel: CurrencyViewModel,navController:NavHostController) {
+fun CurrencyScreen(viewModel: CurrencyViewModel, navController: NavHostController) {
+    val context = LocalContext.current
+
     var fromCurrency by remember { mutableStateOf("USD") }
     var toCurrency by remember { mutableStateOf("INR") }
     var amountInput by remember { mutableStateOf("") }
 
-    val conversionRate by viewModel.conversionRate.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
+    val conversionRate by viewModel.conversionRate.collectAsState()
     val error by viewModel.error.collectAsState()
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
-            .padding(horizontal = 16.dp, vertical = 8.dp),
-        verticalArrangement = Arrangement.spacedBy(20.dp)
-    ) {
-        Spacer(modifier=Modifier.padding(30.dp))
-        Text(
-            "Currency Converter",
-            style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.SemiBold),
-            modifier = Modifier.align(Alignment.CenterHorizontally)
-        )
+    var noInternet by remember { mutableStateOf(false) }
 
-        OutlinedTextField(
-            value = amountInput,
-            onValueChange = { amountInput = it },
-            label = { Text("Amount in $fromCurrency") },
+    if (noInternet) {
+        Column(
             modifier = Modifier
-                .fillMaxWidth(),
-            singleLine = true
-        )
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                .fillMaxSize()
+                .padding(32.dp),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            OutlinedTextField(
-                value = fromCurrency,
-                onValueChange = { fromCurrency = it.uppercase() },
-                label = { Text("From") },
-                singleLine = true,
-                modifier = Modifier.weight(1f)
+            Text(
+                "No Internet Connection",
+                style = MaterialTheme.typography.headlineMedium,
+                color = MaterialTheme.colorScheme.error,
+                textAlign = TextAlign.Center
             )
-            OutlinedTextField(
-                value = toCurrency,
-                onValueChange = { toCurrency = it.uppercase() },
-                label = { Text("To") },
-                singleLine = true,
-                modifier = Modifier.weight(1f)
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                "Please check your network and try again.",
+                style = MaterialTheme.typography.bodyMedium,
+                textAlign = TextAlign.Center
             )
-        }
-
-        Button(
-            onClick = {
-                if (fromCurrency.isNotBlank() && toCurrency.isNotBlank()) {
-                    viewModel.fetchConversionRate(fromCurrency, toCurrency)
-                }
-            },
-            enabled = !isLoading,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(48.dp)
-        ) {
-            if (isLoading) {
-                CircularProgressIndicator(
-                    modifier = Modifier.size(20.dp),
-                    strokeWidth = 2.dp,
-                    color = MaterialTheme.colorScheme.onPrimary
-                )
-            } else {
-                Text("Convert")
+            Spacer(modifier = Modifier.height(24.dp))
+            Button(onClick = {
+                noInternet = false
+            }) {
+                Text("Try Again")
             }
         }
+    } else {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 16.dp, vertical = 8.dp),
+            verticalArrangement = Arrangement.spacedBy(20.dp)
+        ) {
+            Spacer(modifier = Modifier.padding(30.dp))
 
-        error?.let {
             Text(
-                text = "Error: $it",
-                color = MaterialTheme.colorScheme.error,
-                style = MaterialTheme.typography.bodyMedium
+                "Currency Converter",
+                style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.SemiBold),
+                modifier = Modifier.align(Alignment.CenterHorizontally)
             )
-        }
 
-        conversionRate?.let { rate ->
-            val amount = amountInput.toDoubleOrNull() ?: 0.0
-            val converted = rate * amount
+            OutlinedTextField(
+                value = amountInput,
+                onValueChange = { amountInput = it },
+                label = { Text("Amount in $fromCurrency") },
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true
+            )
 
-            Card(
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                OutlinedTextField(
+                    value = fromCurrency,
+                    onValueChange = { fromCurrency = it.uppercase() },
+                    label = { Text("From") },
+                    singleLine = true,
+                    modifier = Modifier.weight(1f)
+                )
+                OutlinedTextField(
+                    value = toCurrency,
+                    onValueChange = { toCurrency = it.uppercase() },
+                    label = { Text("To") },
+                    singleLine = true,
+                    modifier = Modifier.weight(1f)
+                )
+            }
+
+            Button(
+                onClick = {
+                    if (isInternetAvailable(context)) {
+                        viewModel.fetchConversionRate(fromCurrency, toCurrency)
+                    } else {
+                        noInternet = true
+                    }
+                },
+                enabled = !isLoading,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 8.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.8f)
-                ),
-                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+                    .height(48.dp)
             ) {
-                Column(
+                if (isLoading) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(20.dp),
+                        strokeWidth = 2.dp,
+                        color = MaterialTheme.colorScheme.onPrimary
+                    )
+                } else {
+                    Text("Convert")
+                }
+            }
+
+            error?.let {
+                Text(
+                    text = "Error: $it",
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            }
+
+            conversionRate?.let { rate ->
+                val amount = amountInput.toDoubleOrNull() ?: 0.0
+                val converted = rate * amount
+
+                Card(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(16.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
+                        .padding(top = 8.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.8f)
+                    ),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
                 ) {
-                    Text(
-                        "$amountInput $fromCurrency = %.2f $toCurrency".format(converted),
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Medium
-                    )
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            "$amountInput $fromCurrency = %.2f $toCurrency".format(converted),
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Medium
+                        )
+                    }
                 }
             }
         }
