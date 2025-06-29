@@ -26,7 +26,6 @@ import com.example.financeapp1.repository.FavoritePairRepository
 
 @Composable
 fun CurrencyScreen(
-
     navController: NavHostController,
     context: Context = LocalContext.current
 ) {
@@ -45,6 +44,17 @@ fun CurrencyScreen(
     val error by viewModel.error.collectAsState()
     val favorites by viewModel.favorites.collectAsState(initial = emptyList<FavoritePairEntity>())
 
+    var displayedConversionRate by remember { mutableStateOf<Double?>(null) }
+    var displayedFromCurrency by remember { mutableStateOf(fromCurrency) }
+    var displayedToCurrency by remember { mutableStateOf(toCurrency) }
+
+    LaunchedEffect(conversionRate) {
+        conversionRate?.let {
+            displayedConversionRate = it
+            displayedFromCurrency = fromCurrency
+            displayedToCurrency = toCurrency
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -119,7 +129,7 @@ fun CurrencyScreen(
             )
         }
 
-        conversionRate?.let { rate ->
+        displayedConversionRate?.let { rate ->
             val amount = amountInput.toDoubleOrNull() ?: 0.0
             val converted = rate * amount
 
@@ -138,15 +148,16 @@ fun CurrencyScreen(
                         .padding(16.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
+
                     Text(
-                        "$amountInput $fromCurrency = %.2f $toCurrency".format(converted),
+                        "$amountInput $displayedFromCurrency = %.2f $displayedToCurrency".format(converted),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Medium
                     )
                     Spacer(modifier = Modifier.height(8.dp))
 
                     Button(onClick = {
-                        viewModel.addFavorite(fromCurrency, toCurrency)
+                        viewModel.addFavorite(displayedFromCurrency, displayedToCurrency)
                     }) {
                         Text("Add to Favorites")
                     }
@@ -168,6 +179,7 @@ fun CurrencyScreen(
         )
     }
 }
+
 
 @Composable
 fun FavoritePairsList(
