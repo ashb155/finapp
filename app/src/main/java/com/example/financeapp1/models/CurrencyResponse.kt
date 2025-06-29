@@ -1,5 +1,7 @@
 package com.example.financeapp.models
 
+import androidx.room.Entity
+import androidx.room.PrimaryKey
 import com.google.gson.annotations.SerializedName
 
 data class CurrencyResponse(
@@ -17,3 +19,4 @@ data class CurrencyResponse(
     @SerializedName("conversion_rate")
     val conversionRate: Double
 )
+
