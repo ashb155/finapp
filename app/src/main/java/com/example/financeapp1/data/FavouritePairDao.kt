@@ -2,7 +2,7 @@ package com.example.financeapp1.data
 
 import androidx.room.*
 import kotlinx.coroutines.flow.Flow
-
+//data access object
 @Dao
 interface FavoritePairDao {
 

@@ -1,6 +1,7 @@
 package com.example.financeapp.screens
 
 import android.content.Context
+import android.graphics.Paint.Align
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -18,6 +19,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import com.example.financeapp.utils.isInternetAvailable
 import com.example.financeapp1.data.FavoritePairEntity
 import com.example.financeapp.viewmodels.CurrencyViewModel
 import com.example.financeapp.viewmodels.CurrencyViewModelFactory
@@ -31,9 +33,7 @@ fun CurrencyScreen(
 ) {
     val db = remember { AppDatabase.getDatabase(context) }
     val repository = remember { FavoritePairRepository(db.favoritePairDao()) }
-    val viewModel: CurrencyViewModel = viewModel(
-        factory = CurrencyViewModelFactory(repository)
-    )
+    val viewModel: CurrencyViewModel = viewModel(factory = CurrencyViewModelFactory(repository))
 
     var fromCurrency by remember { mutableStateOf("USD") }
     var toCurrency by remember { mutableStateOf("INR") }
@@ -42,11 +42,13 @@ fun CurrencyScreen(
     val conversionRate by viewModel.conversionRate.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
     val error by viewModel.error.collectAsState()
-    val favorites by viewModel.favorites.collectAsState(initial = emptyList<FavoritePairEntity>())
+    val favorites by viewModel.favorites.collectAsState(initial = emptyList())
 
     var displayedConversionRate by remember { mutableStateOf<Double?>(null) }
     var displayedFromCurrency by remember { mutableStateOf(fromCurrency) }
     var displayedToCurrency by remember { mutableStateOf(toCurrency) }
+
+    var noInternet by remember { mutableStateOf(false) }
 
     LaunchedEffect(conversionRate) {
         conversionRate?.let {
@@ -71,6 +73,39 @@ fun CurrencyScreen(
             modifier = Modifier.align(Alignment.CenterHorizontally)
         )
 
+        if (noInternet) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(32.dp),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    "No Internet Connection",
+                    style = MaterialTheme.typography.headlineMedium,
+                    color = MaterialTheme.colorScheme.error,
+                    textAlign = TextAlign.Center
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    "Please check your network and try again.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    textAlign = TextAlign.Center
+                )
+                Spacer(modifier = Modifier.height(24.dp))
+                Button(onClick = {
+                    if (isInternetAvailable(context)) {
+                        noInternet = false
+                    }
+                }) {
+                    Text("Try Again")
+                }
+            }
+            return@Column
+        }
+
+        // Shown only when internet is available
         OutlinedTextField(
             value = amountInput,
             onValueChange = { amountInput = it },
@@ -101,11 +136,13 @@ fun CurrencyScreen(
 
         Button(
             onClick = {
-                if (fromCurrency.isNotBlank() && toCurrency.isNotBlank()) {
+                if ((fromCurrency.isNotBlank() && toCurrency.isNotBlank()) && isInternetAvailable(context)) {
                     viewModel.fetchConversionRate(fromCurrency, toCurrency)
+                } else {
+                    noInternet = true
                 }
             },
-            enabled = !isLoading,
+            enabled = !isLoading && amountInput.toDoubleOrNull() != null,
             modifier = Modifier
                 .fillMaxWidth()
                 .height(48.dp)
@@ -130,7 +167,7 @@ fun CurrencyScreen(
         }
 
         displayedConversionRate?.let { rate ->
-            val amount = amountInput.toDoubleOrNull() ?: 0.0
+            val amount = amountInput.toDoubleOrNull() ?: return@let
             val converted = rate * amount
 
             Card(
@@ -148,14 +185,12 @@ fun CurrencyScreen(
                         .padding(16.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-
                     Text(
                         "$amountInput $displayedFromCurrency = %.2f $displayedToCurrency".format(converted),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Medium
                     )
                     Spacer(modifier = Modifier.height(8.dp))
-
                     Button(onClick = {
                         viewModel.addFavorite(displayedFromCurrency, displayedToCurrency)
                     }) {
@@ -194,7 +229,8 @@ fun FavoritePairsList(
             "Saved Currency Pairs",
             style = MaterialTheme.typography.titleMedium,
             textAlign = TextAlign.Center,
-            modifier = Modifier.padding(8.dp)
+            modifier = Modifier
+                .padding(8.dp)
                 .fillMaxWidth()
         )
         LazyRow(
