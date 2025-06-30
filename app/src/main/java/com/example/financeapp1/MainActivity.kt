@@ -3,9 +3,15 @@ package com.example.financeapp
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
+import androidx.compose.ui.Modifier
 import androidx.navigation.compose.rememberNavController
 import com.example.financeapp.navigation.AppNavHost
+import com.example.financeapp.navigation.BottomNavigationBar
 import com.example.financeapp.ui.theme.FinanceAppTheme
 
 class MainActivity : ComponentActivity() {
@@ -13,9 +19,20 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             FinanceAppTheme {
-                Surface {
-                    val navController = rememberNavController()
-                    AppNavHost(navController = navController)
+                val navController = rememberNavController()
+
+                Scaffold(
+                    bottomBar = {
+                        BottomNavigationBar(navController = navController)
+                    }
+                ) { innerPadding ->
+                    Surface(
+                        color = MaterialTheme.colorScheme.background
+                    ) {
+                        Box(modifier = Modifier.padding(innerPadding)) {
+                            AppNavHost(navController = navController)
+                        }
+                    }
                 }
             }
         }
