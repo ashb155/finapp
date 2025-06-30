@@ -4,7 +4,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 
-
+//custom app theme
 private val DarkColorScheme= darkColorScheme(
     primary = Color(0xFF4B7BE5),         //accent
     onPrimary = Color.White,
