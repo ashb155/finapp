@@ -14,4 +14,7 @@ interface FavoritePairDao {
 
     @Delete
     suspend fun deleteFavorite(favorite: FavoritePairEntity)
+
+
+
 }

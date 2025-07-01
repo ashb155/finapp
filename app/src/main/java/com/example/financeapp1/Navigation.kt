@@ -1,4 +1,4 @@
-package com.example.financeapp.navigation
+package com.example.financeapp
 
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
@@ -11,8 +11,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.financeapp.screens.CurrencyScreen
-import com.example.financeapp1.ExpenseScreen
 import androidx.compose.runtime.getValue
+import com.example.financeapp1.ExpenseScreen
 
 
 @Composable
