@@ -12,21 +12,33 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.financeapp.screens.CurrencyScreen
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.platform.LocalContext
+import androidx.room.Room
 import com.example.financeapp1.ExpenseScreen
+import com.example.financeapp1.data.AppDatabase
+import com.example.financeapp1.repository.ExpenseRepository
 
 
 @Composable
 fun AppNavHost(navController: NavHostController) {
+    val context = LocalContext.current
+    val db = Room.databaseBuilder(
+        context,
+        AppDatabase::class.java,
+        "finance-db"
+    ).build()
+    val repository = ExpenseRepository(db.expenseDao())
+
     NavHost(navController = navController, startDestination = "currency") {
         composable("currency") {
-                CurrencyScreen(navController = navController)
-            }
-        composable("expense"){
-            ExpenseScreen()
+            CurrencyScreen(navController = navController)
         }
+        composable("expense") {
+            ExpenseScreen(repository = repository)
         }
-
     }
+}
+
 
 
 sealed class BottomNavScreen(
