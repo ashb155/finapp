@@ -7,12 +7,8 @@ import androidx.room.PrimaryKey
 data class ExpenseEntity(
     @PrimaryKey(autoGenerate = true)
     val id: Int = 0,
+    val title: String,
+    val category: String,
     val amount: Double,
-    val timestamp: Long,
-    val date: Long
-)
-
-data class ExpenseTotalByDate(
-    val date: Long,
-    val total: Double
+    val timestamp: Long
 )
