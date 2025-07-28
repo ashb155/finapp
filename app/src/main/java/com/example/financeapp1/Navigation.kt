@@ -1,19 +1,18 @@
 package com.example.financeapp
 
-import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
-import com.example.financeapp.screens.CurrencyScreen
-import androidx.compose.runtime.getValue
-import androidx.compose.ui.platform.LocalContext
 import androidx.room.Room
+import com.example.financeapp.screens.CurrencyScreen
+import com.example.financeapp1.AddExpenseScreen
 import com.example.financeapp1.ExpenseScreen
 import com.example.financeapp1.data.AppDatabase
 import com.example.financeapp1.repository.ExpenseRepository
@@ -34,7 +33,10 @@ fun AppNavHost(navController: NavHostController) {
             CurrencyScreen(navController = navController)
         }
         composable("expense") {
-            ExpenseScreen(repository = repository)
+            ExpenseScreen(repository = repository,navController)
+        }
+        composable("add_expense"){
+            AddExpenseScreen(repository=repository,navController)
         }
     }
 }
@@ -81,3 +83,4 @@ sealed class BottomNavScreen(
             }
         }
     }
+
