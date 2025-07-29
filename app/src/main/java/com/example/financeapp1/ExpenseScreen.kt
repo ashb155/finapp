@@ -5,6 +5,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -29,7 +30,7 @@ import java.time.LocalDate
 
 
 @Composable
-fun ExpenseScreen(repository: ExpenseRepository,navController: NavController) {
+fun ExpenseScreen(repository: ExpenseRepository, navController: NavController) {
     val factory = remember { ExpenseViewModelFactory(repository) }
     val viewModel: ExpenseViewModel = viewModel(factory = factory)
 
@@ -39,7 +40,8 @@ fun ExpenseScreen(repository: ExpenseRepository,navController: NavController) {
         floatingActionButton = {
             Box(
                 modifier = Modifier
-                    .fillMaxWidth(),
+                    .fillMaxWidth()
+                    .padding(bottom = 24.dp), // raised a bit
                 contentAlignment = Alignment.Center
             ) {
                 FloatingActionButton(
@@ -89,29 +91,44 @@ fun ExpenseScreen(repository: ExpenseRepository,navController: NavController) {
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .padding(16.dp),
-                                horizontalArrangement = Arrangement.SpaceBetween
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Column {
+                                Column(
+                                    modifier = Modifier.weight(1f)
+                                ) {
                                     Text(text = expense.title, color = Color.White)
                                     Text(
-                                            text = expense.category,
-                                            color = MaterialTheme.colorScheme.onPrimary,
-                                            style = MaterialTheme.typography.bodySmall
-                                        )
-
-                                }
-                                Column{
-                                Text(
-                                    text = "₹${expense.amount}",
-                                    color = Color.White,
-                                    style = MaterialTheme.typography.titleMedium
-                                )
-                                    Text(
-                                        text=expense.date,
-                                        color=MaterialTheme.colorScheme.onPrimary,
-                                        style=MaterialTheme.typography.bodySmall
+                                        text = expense.category,
+                                        color = MaterialTheme.colorScheme.onPrimary,
+                                        style = MaterialTheme.typography.bodySmall
                                     )
-                            }}
+                                }
+
+                                Column(
+                                    horizontalAlignment = Alignment.End,
+                                    modifier = Modifier.padding(end = 8.dp)
+                                ) {
+                                    Text(
+                                        text = "₹${expense.amount}",
+                                        color = Color.White,
+                                        style = MaterialTheme.typography.titleMedium
+                                    )
+                                    Text(
+                                        text = expense.date,
+                                        color = MaterialTheme.colorScheme.onPrimary,
+                                        style = MaterialTheme.typography.bodySmall
+                                    )
+                                }
+
+                                IconButton(onClick = { viewModel.deleteExpense(expense) }) {
+                                    Icon(
+                                        imageVector = Icons.Default.Delete,
+                                        contentDescription = "Delete Expense",
+                                        tint = MaterialTheme.colorScheme.onPrimary
+                                    )
+                                }
+                            }
                         }
                     }
                 }
