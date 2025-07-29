@@ -25,6 +25,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.navigation.NavHostController
 import kotlinx.coroutines.CoroutineScope
+import java.time.LocalDate
 
 
 @Composable
@@ -36,10 +37,18 @@ fun ExpenseScreen(repository: ExpenseRepository,navController: NavController) {
 
     Scaffold(
         floatingActionButton = {
-            FloatingActionButton(onClick = {
-                navController.navigate("add_expense")
-            }) {
-                Icon(Icons.Default.Add, contentDescription = "Add Expense")
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                contentAlignment = Alignment.Center
+            ) {
+                FloatingActionButton(
+                    onClick = {
+                        navController.navigate("add_expense")
+                    }
+                ) {
+                    Icon(Icons.Default.Add, contentDescription = "Add Expense")
+                }
             }
         },
         containerColor = Color(0xFF121212)
@@ -85,17 +94,24 @@ fun ExpenseScreen(repository: ExpenseRepository,navController: NavController) {
                                 Column {
                                     Text(text = expense.title, color = Color.White)
                                     Text(
-                                        text = expense.category,
-                                        color = Color.LightGray,
-                                        style = MaterialTheme.typography.bodySmall
-                                    )
+                                            text = expense.category,
+                                            color = MaterialTheme.colorScheme.onPrimary,
+                                            style = MaterialTheme.typography.bodySmall
+                                        )
+
                                 }
+                                Column{
                                 Text(
                                     text = "₹${expense.amount}",
                                     color = Color.White,
                                     style = MaterialTheme.typography.titleMedium
                                 )
-                            }
+                                    Text(
+                                        text=expense.date,
+                                        color=MaterialTheme.colorScheme.onPrimary,
+                                        style=MaterialTheme.typography.bodySmall
+                                    )
+                            }}
                         }
                     }
                 }
@@ -114,12 +130,11 @@ fun AddExpenseScreen(
     var title by remember { mutableStateOf("") }
     var category by remember { mutableStateOf("") }
     var amount by remember { mutableStateOf("") }
-
+    val currentDate = remember { LocalDate.now().toString() }
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp),
-        verticalArrangement = Arrangement.SpaceBetween
     ) {
         Column {
             Text("Add Expense", style = MaterialTheme.typography.headlineSmall)
@@ -150,21 +165,37 @@ fun AddExpenseScreen(
                 modifier = Modifier.fillMaxWidth()
             )
         }
+        Spacer(modifier=Modifier.padding(20.dp))
 
         Button(
             onClick = {
                 val amt = amount.toDoubleOrNull()
                 if (title.isNotBlank() && category.isNotBlank() && amt != null) {
-                    viewModel.addExpense(title, category, amt)
+                    viewModel.addExpense(title, category, amt,currentDate)
                     navController.popBackStack()
                 }
             },
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 8.dp),
+                .height(48.dp),
             enabled = title.isNotBlank() && category.isNotBlank() && amount.toDoubleOrNull() != null
         ) {
             Text("Add Expense")
         }
-    }
+        Spacer(modifier=Modifier.padding(10.dp))
+        Box(
+            modifier = Modifier
+                .fillMaxWidth(),
+            contentAlignment = Alignment.Center
+        ){
+        Button(
+            onClick = {
+                navController.popBackStack()
+            },
+            modifier = Modifier
+                .height(40.dp),
+        ) {
+            Text("Cancel")
+        }
+    }}
 }

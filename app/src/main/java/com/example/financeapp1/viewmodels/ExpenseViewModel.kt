@@ -33,13 +33,14 @@ class ExpenseViewModel(
             }
         }.stateIn(viewModelScope, SharingStarted.Lazily, emptyMap())
 
-    fun addExpense(title: String, category: String, amount: Double) {
+    fun addExpense(title: String, category: String, amount: Double,date:String ) {
         val timestamp = System.currentTimeMillis()
         val expense = ExpenseEntity(
             title = title,
             category = category,
             amount = amount,
-            timestamp = timestamp
+            timestamp = timestamp,
+            date=date
         )
         viewModelScope.launch {
             repository.insertExpense(expense)
