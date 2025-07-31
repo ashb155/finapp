@@ -9,10 +9,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -26,6 +26,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -44,7 +45,10 @@ import com.example.financeapp1.viewmodels.BudgetViewModel
 import com.example.financeapp1.viewmodels.BudgetViewModelFactory
 import com.example.financeapp1.viewmodels.ExpenseViewModel
 import com.example.financeapp1.viewmodels.ExpenseViewModelFactory
+import java.text.SimpleDateFormat
 import java.time.LocalDate
+import java.util.Date
+import java.util.Locale
 
 
 @Composable
@@ -60,8 +64,15 @@ fun ExpenseScreen(
 
     val budget by budgetViewModel.budgetAmount1.collectAsState()
     val expenses by viewModel.allExpenses.collectAsState()
+    val currentMonth = SimpleDateFormat("MMMM", Locale.getDefault()).format(Date())
 
-    Scaffold(
+    LaunchedEffect(currentMonth) {
+        budgetViewModel.loadBudget(currentMonth)
+    }
+
+
+
+        Scaffold(
         floatingActionButton = {
             Column(
                 modifier = Modifier
@@ -69,29 +80,43 @@ fun ExpenseScreen(
                     .padding(bottom = 12.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                if (budget != null) {
+                if (budget != null && budget!=0.0) {
                     Text(
                         text = "Monthly Budget: ₹$budget",
                         color = Color.Green,
                         style = MaterialTheme.typography.bodyLarge,
-                        modifier = Modifier.padding(bottom = 8.dp),
-
+                        modifier = Modifier.padding(bottom = 8.dp)
                     )
                 } else {
                     Text(
                         text = "No budget set for this month.",
-                        color = Color.Red,
+                        color = MaterialTheme.colorScheme.secondary,
                         style = MaterialTheme.typography.bodyLarge,
                         modifier = Modifier.padding(bottom = 8.dp)
                     )
                 }
 
-                FloatingActionButton(
-                    onClick = {
-                        navController.navigate("add_expense")
-                    }
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(16.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Icon(Icons.Default.Add, contentDescription = "Add Expense")
+                    FloatingActionButton(
+                        onClick = { navController.navigate("add_expense") },
+                        modifier = Modifier
+                            .width(120.dp)
+                            .height(50.dp)
+                    ) {
+                       Text("Add Expense")
+                    }
+
+                    FloatingActionButton(
+                        onClick = { navController.navigate("add_budget") },
+                        modifier = Modifier
+                            .width(120.dp)
+                            .height(50.dp)
+                    ) {
+                        Text("Set Budget")
+                    }
                 }
             }
         },
@@ -264,4 +289,45 @@ fun AddExpenseScreen(
     }}
 }
 
+@Composable
+fun AddBudgetScreen(repository: BudgetRepository, navController: NavController) {
+    val factory = remember { BudgetViewModelFactory(repository) }
+    val budgetViewModel: BudgetViewModel = viewModel(factory = factory)
+
+    var inputBudget by remember { mutableStateOf("") }
+    val currentMonth = SimpleDateFormat("MMMM", Locale.getDefault()).format(Date())
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text("Set Monthly Budget", style = MaterialTheme.typography.headlineSmall)
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        OutlinedTextField(
+            value = inputBudget,
+            onValueChange = { inputBudget = it },
+            label = { Text("Budget Amount") },
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Button(
+            onClick = {
+                val amount = inputBudget.toDoubleOrNull()
+                if (amount != null) {
+                    budgetViewModel.setBudget(currentMonth, amount) // updates budgetAmount1
+                    navController.popBackStack()
+                }
+            },
+            enabled = inputBudget.toDoubleOrNull() != null
+        ) {
+            Text("Save Budget")
+        }
+    }
+}
 
