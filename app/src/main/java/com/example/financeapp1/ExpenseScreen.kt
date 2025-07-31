@@ -328,10 +328,13 @@ fun AddBudgetScreen(repository: BudgetRepository, navController: NavController) 
                     navController.popBackStack()
                 }
             },
-            enabled = inputBudget.toDoubleOrNull() != null
+            enabled = inputBudget.toDoubleOrNull() != null,
+            modifier=Modifier.fillMaxWidth()
+                .height(48.dp)
         ) {
             Text("Save Budget")
         }
+        Spacer(modifier=Modifier.padding(5.dp))
         Button(
             onClick = {
                     navController.popBackStack()
