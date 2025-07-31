@@ -18,20 +18,6 @@ class ExpenseViewModel(
     val allExpenses: StateFlow<List<ExpenseEntity>> = repository.getAllExpenses()
         .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
 
-    val totalByDay: StateFlow<Map<Long, Double>> = allExpenses
-        .map { expenses ->
-            expenses.groupBy { expense ->
-                Calendar.getInstance().apply {
-                    timeInMillis = expense.timestamp
-                    set(Calendar.HOUR_OF_DAY, 0)
-                    set(Calendar.MINUTE, 0)
-                    set(Calendar.SECOND, 0)
-                    set(Calendar.MILLISECOND, 0)
-                }.timeInMillis
-            }.mapValues { (_, group) ->
-                group.sumOf { it.amount }
-            }
-        }.stateIn(viewModelScope, SharingStarted.Lazily, emptyMap())
 
     fun addExpense(title: String, category: String, amount: Double,date:String ) {
         val timestamp = System.currentTimeMillis()

@@ -15,6 +15,7 @@ import com.example.financeapp.screens.CurrencyScreen
 import com.example.financeapp1.AddExpenseScreen
 import com.example.financeapp1.ExpenseScreen
 import com.example.financeapp1.data.AppDatabase
+import com.example.financeapp1.repository.BudgetRepository
 import com.example.financeapp1.repository.ExpenseRepository
 
 
@@ -27,13 +28,14 @@ fun AppNavHost(navController: NavHostController) {
         "finance-db"
     ).build()
     val repository = ExpenseRepository(db.expenseDao())
+    val repository1= BudgetRepository(db.budgetDao())
 
     NavHost(navController = navController, startDestination = "currency") {
         composable("currency") {
             CurrencyScreen(navController = navController)
         }
         composable("expense") {
-            ExpenseScreen(repository = repository,navController)
+            ExpenseScreen(repository = repository, repository1,navController)
         }
         composable("add_expense"){
             AddExpenseScreen(repository=repository,navController)

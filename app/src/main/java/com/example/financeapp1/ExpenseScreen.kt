@@ -1,49 +1,91 @@
 package com.example.financeapp1
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material3.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.FabPosition
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import androidx.navigation.NavHostController
+import com.example.financeapp1.repository.BudgetRepository
 import com.example.financeapp1.repository.ExpenseRepository
+import com.example.financeapp1.viewmodels.BudgetViewModel
+import com.example.financeapp1.viewmodels.BudgetViewModelFactory
 import com.example.financeapp1.viewmodels.ExpenseViewModel
 import com.example.financeapp1.viewmodels.ExpenseViewModelFactory
-import androidx.compose.runtime.setValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.navigation.NavHostController
-import kotlinx.coroutines.CoroutineScope
 import java.time.LocalDate
 
 
 @Composable
-fun ExpenseScreen(repository: ExpenseRepository, navController: NavController) {
+fun ExpenseScreen(
+    repository: ExpenseRepository,
+    repository1: BudgetRepository,
+    navController: NavController
+) {
     val factory = remember { ExpenseViewModelFactory(repository) }
+    val factory1 = remember { BudgetViewModelFactory(repository1) }
     val viewModel: ExpenseViewModel = viewModel(factory = factory)
+    val budgetViewModel: BudgetViewModel = viewModel(factory = factory1)
 
+    val budget by budgetViewModel.budgetAmount1.collectAsState()
     val expenses by viewModel.allExpenses.collectAsState()
 
     Scaffold(
         floatingActionButton = {
-            Box(
+            Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(bottom = 24.dp), // raised a bit
-                contentAlignment = Alignment.Center
+                    .padding(bottom = 12.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
+                if (budget != null) {
+                    Text(
+                        text = "Monthly Budget: ₹$budget",
+                        color = Color.Green,
+                        style = MaterialTheme.typography.bodyLarge,
+                        modifier = Modifier.padding(bottom = 8.dp),
+
+                    )
+                } else {
+                    Text(
+                        text = "No budget set for this month.",
+                        color = Color.Red,
+                        style = MaterialTheme.typography.bodyLarge,
+                        modifier = Modifier.padding(bottom = 8.dp)
+                    )
+                }
+
                 FloatingActionButton(
                     onClick = {
                         navController.navigate("add_expense")
@@ -53,6 +95,7 @@ fun ExpenseScreen(repository: ExpenseRepository, navController: NavController) {
                 }
             }
         },
+        floatingActionButtonPosition = FabPosition.Center,
         containerColor = Color(0xFF121212)
     ) { padding ->
         Column(
@@ -121,7 +164,10 @@ fun ExpenseScreen(repository: ExpenseRepository, navController: NavController) {
                                     )
                                 }
 
-                                IconButton(onClick = { viewModel.deleteExpense(expense) }) {
+                                IconButton(
+                                    onClick = { viewModel.deleteExpense(expense) },
+                                    modifier = Modifier.align(Alignment.CenterVertically)
+                                ) {
                                     Icon(
                                         imageVector = Icons.Default.Delete,
                                         contentDescription = "Delete Expense",
@@ -136,6 +182,7 @@ fun ExpenseScreen(repository: ExpenseRepository, navController: NavController) {
         }
     }
 }
+
 
 @Composable
 fun AddExpenseScreen(
@@ -216,3 +263,5 @@ fun AddExpenseScreen(
         }
     }}
 }
+
+

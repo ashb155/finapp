@@ -4,16 +4,18 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import com.example.financeapp1.models.BudgetEntity
 import com.example.financeapp1.models.ExpenseEntity
 
 @Database(
-    entities = [FavoritePairEntity::class, ExpenseEntity::class],
-    version = 5,
+    entities = [FavoritePairEntity::class, ExpenseEntity::class, BudgetEntity::class],
+    version = 6,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
     abstract fun favoritePairDao(): FavoritePairDao
     abstract fun expenseDao(): ExpenseDao
+    abstract fun budgetDao(): BudgetDao
 
     companion object {
         @Volatile
