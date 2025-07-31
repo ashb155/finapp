@@ -226,8 +226,11 @@ fun AddExpenseScreen(
             .padding(16.dp),
     ) {
         Column {
-            Text("Add Expense", style = MaterialTheme.typography.headlineSmall)
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier=Modifier.padding(100.dp))
+            Text("Add Expense", style = MaterialTheme.typography.headlineSmall
+            ,modifier=Modifier.align(Alignment.CenterHorizontally))
+            Spacer(modifier = Modifier.height(16.dp)
+                )
 
             OutlinedTextField(
                 value = title,
@@ -303,6 +306,7 @@ fun AddBudgetScreen(repository: BudgetRepository, navController: NavController) 
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        Spacer(modifier=Modifier.padding(150.dp))
         Text("Set Monthly Budget", style = MaterialTheme.typography.headlineSmall)
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -320,13 +324,20 @@ fun AddBudgetScreen(repository: BudgetRepository, navController: NavController) 
             onClick = {
                 val amount = inputBudget.toDoubleOrNull()
                 if (amount != null) {
-                    budgetViewModel.setBudget(currentMonth, amount) // updates budgetAmount1
+                    budgetViewModel.setBudget(currentMonth, amount)
                     navController.popBackStack()
                 }
             },
             enabled = inputBudget.toDoubleOrNull() != null
         ) {
             Text("Save Budget")
+        }
+        Button(
+            onClick = {
+                    navController.popBackStack()
+                }
+        ) {
+            Text("Cancel")
         }
     }
 }
