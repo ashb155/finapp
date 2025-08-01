@@ -64,15 +64,25 @@ fun ExpenseScreen(
 
     val budget by budgetViewModel.budgetAmount1.collectAsState()
     val expenses by viewModel.allExpenses.collectAsState()
+
     val currentMonth = SimpleDateFormat("MMMM", Locale.getDefault()).format(Date())
+    val currentMonthNumber = SimpleDateFormat("MM", Locale.getDefault()).format(Date())
+    val currentYear = SimpleDateFormat("yyyy", Locale.getDefault()).format(Date())
 
     LaunchedEffect(currentMonth) {
         budgetViewModel.loadBudget(currentMonth)
     }
 
+    val totalMonthlyExpense = expenses
+        .filter { expense ->
+            val parts = expense.date.split("-")
+            parts.size >= 2 && parts[1] == currentMonthNumber && parts[0] == currentYear
+        }
+        .sumOf { it.amount }
 
+    val remainingBudget = if (budget != null) budget!! - totalMonthlyExpense else 0.0
 
-        Scaffold(
+    Scaffold(
         floatingActionButton = {
             Column(
                 modifier = Modifier
@@ -80,10 +90,16 @@ fun ExpenseScreen(
                     .padding(bottom = 12.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                if (budget != null && budget!=0.0) {
+                if (budget != null && budget != 0.0) {
                     Text(
                         text = "Monthly Budget: ₹$budget",
-                        color = Color.Green,
+                        color = MaterialTheme.colorScheme.secondary,
+                        style = MaterialTheme.typography.bodyLarge,
+                        modifier = Modifier.padding(bottom = 4.dp)
+                    )
+                    Text(
+                        text = "Remaining: ₹${"%.2f".format(remainingBudget)}",
+                        color = if (remainingBudget >= 0) Color.Green else Color.Red,
                         style = MaterialTheme.typography.bodyLarge,
                         modifier = Modifier.padding(bottom = 8.dp)
                     )
@@ -106,7 +122,7 @@ fun ExpenseScreen(
                             .width(120.dp)
                             .height(50.dp)
                     ) {
-                       Text("Add Expense")
+                        Text("Add Expense")
                     }
 
                     FloatingActionButton(
@@ -209,12 +225,14 @@ fun ExpenseScreen(
 }
 
 
+
 @Composable
 fun AddExpenseScreen(
     repository: ExpenseRepository,
     navController: NavHostController
 ) {
-    val viewModel = remember { ExpenseViewModel(repository) }
+    val factory = remember { ExpenseViewModelFactory(repository) }
+    val viewModel: ExpenseViewModel = viewModel(factory = factory)
 
     var title by remember { mutableStateOf("") }
     var category by remember { mutableStateOf("") }
