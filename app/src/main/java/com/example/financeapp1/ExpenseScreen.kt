@@ -1,5 +1,6 @@
 package com.example.financeapp1
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -111,7 +112,9 @@ fun ExpenseScreen(
                         Text(
                             text = "₹${"%.2f".format(remainingBudget)}",
                             style = MaterialTheme.typography.titleLarge,
-                            color = if (remainingBudget >= 0) Color(0xFF4CAF50) else Color.Red,
+                            color = if (remainingBudget >= 0 && remainingBudget>=10*remainingBudget/100) {Color.Green}
+                                    else if (remainingBudget>=0 && remainingBudget<10*remainingBudget/100){Color.Yellow}
+                                    else{Color.Red},
                             modifier = Modifier.padding(bottom = 8.dp)
                         )
                     }
@@ -147,7 +150,11 @@ fun ExpenseScreen(
                             .height(50.dp)
                     ) {
                         Text(
-                            "Set Budget",
+                            if(budget!=null && budget!=0.0){
+                            "Update Budget"}
+                            else{
+                                "Set Budget"
+                            },
                             style = MaterialTheme.typography.titleSmall
                         )
                     }
@@ -181,7 +188,7 @@ fun ExpenseScreen(
             } else {
                 LazyColumn(
                     modifier = Modifier.fillMaxSize()
-                        .padding(bottom = 175.dp),
+                        .padding(bottom = if (budget != null && budget != 0.0) 170.dp else 90.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
 
                 ) {
