@@ -3,6 +3,8 @@ package com.example.financeapp.ui.theme
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
+import com.example.financeapp1.ui.theme.AppTypography
+
 
 //custom app theme
 private val DarkColorScheme= darkColorScheme(
@@ -20,7 +22,6 @@ private val DarkColorScheme= darkColorScheme(
 
 )
 
-private val AppTypography= Typography()
 private val AppShapes=Shapes()
 
 @Composable

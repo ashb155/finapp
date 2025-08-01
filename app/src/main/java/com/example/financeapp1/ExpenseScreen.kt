@@ -1,5 +1,6 @@
 package com.example.financeapp1
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -64,29 +65,59 @@ fun ExpenseScreen(
 
     val budget by budgetViewModel.budgetAmount1.collectAsState()
     val expenses by viewModel.allExpenses.collectAsState()
+
     val currentMonth = SimpleDateFormat("MMMM", Locale.getDefault()).format(Date())
+    val currentMonthNumber = SimpleDateFormat("MM", Locale.getDefault()).format(Date())
+    val currentYear = SimpleDateFormat("yyyy", Locale.getDefault()).format(Date())
 
     LaunchedEffect(currentMonth) {
         budgetViewModel.loadBudget(currentMonth)
     }
 
+    val totalMonthlyExpense = expenses
+        .filter { expense ->
+            val parts = expense.date.split("-")
+            parts.size >= 2 && parts[1] == currentMonthNumber && parts[0] == currentYear
+        }
+        .sumOf { it.amount }
 
+    val remainingBudget = if (budget != null) budget!! - totalMonthlyExpense else 0.0
 
-        Scaffold(
+    Scaffold(
         floatingActionButton = {
             Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 12.dp),
+                    .fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                if (budget != null && budget!=0.0) {
-                    Text(
-                        text = "Monthly Budget: ₹$budget",
-                        color = Color.Green,
-                        style = MaterialTheme.typography.bodyLarge,
-                        modifier = Modifier.padding(bottom = 8.dp)
-                    )
+                Spacer(modifier=Modifier.padding(40.dp))
+                if (budget != null && budget != 0.0) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(
+                            text = "Monthly Budget",
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.secondary,
+                        )
+                        Text(
+                            text = "₹${"%.2f".format(budget)}",
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.padding(bottom = 4.dp)
+                        )
+                        Text(
+                            text = "Remaining",
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.secondary,
+                        )
+                        Text(
+                            text = "₹${"%.2f".format(remainingBudget)}",
+                            style = MaterialTheme.typography.titleLarge,
+                            color = if (remainingBudget >= 0 && remainingBudget>=10*remainingBudget/100) {Color.Green}
+                                    else if (remainingBudget>=0 && remainingBudget<10*remainingBudget/100){Color.Yellow}
+                                    else{Color.Red},
+                            modifier = Modifier.padding(bottom = 8.dp)
+                        )
+                    }
                 } else {
                     Text(
                         text = "No budget set for this month.",
@@ -106,7 +137,10 @@ fun ExpenseScreen(
                             .width(120.dp)
                             .height(50.dp)
                     ) {
-                       Text("Add Expense")
+                        Text(
+                            "Add Expense",
+                            style = MaterialTheme.typography.titleSmall
+                        )
                     }
 
                     FloatingActionButton(
@@ -115,7 +149,14 @@ fun ExpenseScreen(
                             .width(120.dp)
                             .height(50.dp)
                     ) {
-                        Text("Set Budget")
+                        Text(
+                            if(budget!=null && budget!=0.0){
+                            "Update Budget"}
+                            else{
+                                "Set Budget"
+                            },
+                            style = MaterialTheme.typography.titleSmall
+                        )
                     }
                 }
             }
@@ -131,8 +172,7 @@ fun ExpenseScreen(
         ) {
             Text(
                 text = "Recent Expenses",
-                style = MaterialTheme.typography.titleLarge,
-                color = Color.White,
+                style = MaterialTheme.typography.headlineSmall,
                 modifier = Modifier.align(Alignment.CenterHorizontally)
             )
 
@@ -147,8 +187,10 @@ fun ExpenseScreen(
                 )
             } else {
                 LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
+                    modifier = Modifier.fillMaxSize()
+                        .padding(bottom = if (budget != null && budget != 0.0) 170.dp else 90.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
+
                 ) {
                     items(expenses) { expense ->
                         Card(
@@ -214,7 +256,8 @@ fun AddExpenseScreen(
     repository: ExpenseRepository,
     navController: NavHostController
 ) {
-    val viewModel = remember { ExpenseViewModel(repository) }
+    val factory = remember { ExpenseViewModelFactory(repository) }
+    val viewModel: ExpenseViewModel = viewModel(factory = factory)
 
     var title by remember { mutableStateOf("") }
     var category by remember { mutableStateOf("") }
@@ -226,11 +269,15 @@ fun AddExpenseScreen(
             .padding(16.dp),
     ) {
         Column {
-            Spacer(modifier=Modifier.padding(100.dp))
-            Text("Add Expense", style = MaterialTheme.typography.headlineSmall
-            ,modifier=Modifier.align(Alignment.CenterHorizontally))
-            Spacer(modifier = Modifier.height(16.dp)
-                )
+            Spacer(modifier = Modifier.padding(100.dp))
+            Text(
+                "Add Expense",
+                style = MaterialTheme.typography.headlineSmall,
+                modifier = Modifier.align(Alignment.CenterHorizontally)
+            )
+            Spacer(
+                modifier = Modifier.height(16.dp)
+            )
 
             OutlinedTextField(
                 value = title,
@@ -257,13 +304,13 @@ fun AddExpenseScreen(
                 modifier = Modifier.fillMaxWidth()
             )
         }
-        Spacer(modifier=Modifier.padding(20.dp))
+        Spacer(modifier = Modifier.padding(20.dp))
 
         Button(
             onClick = {
                 val amt = amount.toDoubleOrNull()
                 if (title.isNotBlank() && category.isNotBlank() && amt != null) {
-                    viewModel.addExpense(title, category, amt,currentDate)
+                    viewModel.addExpense(title, category, amt, currentDate)
                     navController.popBackStack()
                 }
             },
@@ -272,24 +319,31 @@ fun AddExpenseScreen(
                 .height(48.dp),
             enabled = title.isNotBlank() && category.isNotBlank() && amount.toDoubleOrNull() != null
         ) {
-            Text("Add Expense")
+            Text(
+                "Add Expense",
+                style = MaterialTheme.typography.titleMedium
+            )
         }
-        Spacer(modifier=Modifier.padding(10.dp))
+        Spacer(modifier = Modifier.padding(10.dp))
         Box(
             modifier = Modifier
                 .fillMaxWidth(),
             contentAlignment = Alignment.Center
-        ){
-        Button(
-            onClick = {
-                navController.popBackStack()
-            },
-            modifier = Modifier
-                .height(40.dp),
         ) {
-            Text("Cancel")
+            Button(
+                onClick = {
+                    navController.popBackStack()
+                },
+                modifier = Modifier
+                    .height(40.dp),
+            ) {
+                Text(
+                    "Cancel",
+                    style = MaterialTheme.typography.titleSmall
+                )
+            }
         }
-    }}
+    }
 }
 
 @Composable
@@ -306,7 +360,7 @@ fun AddBudgetScreen(repository: BudgetRepository, navController: NavController) 
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Spacer(modifier=Modifier.padding(150.dp))
+        Spacer(modifier = Modifier.padding(150.dp))
         Text("Set Monthly Budget", style = MaterialTheme.typography.headlineSmall)
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -329,18 +383,25 @@ fun AddBudgetScreen(repository: BudgetRepository, navController: NavController) 
                 }
             },
             enabled = inputBudget.toDoubleOrNull() != null,
-            modifier=Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
                 .height(48.dp)
         ) {
-            Text("Save Budget")
+            Text(
+                "Save Budget",
+                style = MaterialTheme.typography.titleMedium
+            )
         }
-        Spacer(modifier=Modifier.padding(5.dp))
+        Spacer(modifier = Modifier.padding(5.dp))
         Button(
             onClick = {
-                    navController.popBackStack()
-                }
+                navController.popBackStack()
+            }
         ) {
-            Text("Cancel")
+            Text(
+                "Cancel",
+                style = MaterialTheme.typography.titleSmall
+            )
         }
     }
 }
