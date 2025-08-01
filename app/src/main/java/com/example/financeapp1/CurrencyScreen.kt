@@ -176,7 +176,8 @@ fun CurrencyScreen(
                     color = MaterialTheme.colorScheme.onPrimary
                 )
             } else {
-                Text("Convert")
+                Text("Convert",
+                    style=MaterialTheme.typography.titleMedium)
             }
         }
 
@@ -210,13 +211,13 @@ fun CurrencyScreen(
                     Text(
                         "$amountInput $displayedFromCurrency = %.2f $displayedToCurrency".format(converted),
                         style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Medium
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Button(onClick = {
                         viewModel.addFavorite(displayedFromCurrency, displayedToCurrency)
                     }) {
-                        Text("Add to Favorites")
+                        Text("Add to Favorites",
+                            style=MaterialTheme.typography.titleSmall)
                     }
                 }
             }
