@@ -188,7 +188,7 @@ fun ExpenseScreen(
             } else {
                 LazyColumn(
                     modifier = Modifier.fillMaxSize()
-                        .padding(bottom = if (budget != null && budget != 0.0) 170.dp else 90.dp),
+                        .padding(bottom = if (budget != null && budget != 0.0) 160.dp else 90.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
 
                 ) {
