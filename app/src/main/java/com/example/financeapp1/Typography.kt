@@ -13,10 +13,6 @@ val SpaceGrotesk = FontFamily(
     Font(R.font.sgb, FontWeight.Bold)
 )
 
-val Sora = FontFamily(
-    Font(R.font.sr, FontWeight.Normal),
-    Font(R.font.sm, FontWeight.SemiBold)
-)
 
 val AppTypography = Typography(
     headlineSmall = TextStyle(
