@@ -1,5 +1,6 @@
 package com.example.financeapp1
 
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -36,6 +37,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
@@ -305,12 +307,18 @@ fun AddExpenseScreen(
             )
         }
         Spacer(modifier = Modifier.padding(20.dp))
+        val context = LocalContext.current
 
         Button(
             onClick = {
                 val amt = amount.toDoubleOrNull()
                 if (title.isNotBlank() && category.isNotBlank() && amt != null) {
                     viewModel.addExpense(title, category, amt, currentDate)
+                    Toast.makeText(
+                        context,
+                        "Expense Added Successfully",
+                        Toast.LENGTH_SHORT
+                    ).show()
                     navController.popBackStack()
                 }
             },
