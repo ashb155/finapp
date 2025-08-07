@@ -273,7 +273,7 @@ fun AddExpenseScreen(
             .padding(16.dp),
     ) {
         Column {
-            Spacer(modifier = Modifier.height(80.dp))
+            Spacer(modifier = Modifier.height(160.dp))
             Text(
                 "Add Expense",
                 style = MaterialTheme.typography.headlineSmall,
@@ -371,7 +371,7 @@ fun AddBudgetScreen(repository: BudgetRepository, navController: NavController) 
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Spacer(modifier = Modifier.height(120.dp))
+        Spacer(modifier = Modifier.height(240.dp))
         Text("Set Monthly Budget", style = MaterialTheme.typography.headlineSmall)
 
         Spacer(modifier = Modifier.height(16.dp))
