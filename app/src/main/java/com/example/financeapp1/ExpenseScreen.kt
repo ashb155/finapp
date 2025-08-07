@@ -319,7 +319,7 @@ fun AddExpenseScreen(
                     viewModel.addExpense(title, category, amt, currentDate)
                     Toast.makeText(
                         context,
-                        "Expense Added Successfully",
+                        "Expense added successfully",
                         Toast.LENGTH_SHORT
                     ).show()
                     navController.popBackStack()
@@ -384,12 +384,19 @@ fun AddBudgetScreen(repository: BudgetRepository, navController: NavController) 
         )
 
         Spacer(modifier = Modifier.height(16.dp))
+        val context=LocalContext.current
         val amount=inputBudget.toDoubleOrNull()
         Button(
             onClick = {
                 if (amount != null && amount>0) {
                     budgetViewModel.setBudget(currentMonth, amount)
+                    Toast.makeText(
+                        context,
+                        "Budget updated successfully",
+                        Toast.LENGTH_SHORT
+                    ).show()
                     navController.popBackStack()
+
                 }
             },
             enabled = amount != null && amount>0,
