@@ -1,5 +1,6 @@
 package com.example.financeapp1
 
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -36,6 +37,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
@@ -90,7 +92,7 @@ fun ExpenseScreen(
                     .fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Spacer(modifier=Modifier.padding(40.dp))
+                Spacer(modifier=Modifier.height(40.dp))
                 if (budget != null && budget != 0.0) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Text(
@@ -112,9 +114,11 @@ fun ExpenseScreen(
                         Text(
                             text = "₹${"%.2f".format(remainingBudget)}",
                             style = MaterialTheme.typography.titleLarge,
-                            color = if (remainingBudget >= 0 && remainingBudget>=10*remainingBudget/100) {Color.Green}
-                                    else if (remainingBudget>=0 && remainingBudget<10*remainingBudget/100){Color.Yellow}
-                                    else{Color.Red},
+                            color = when {
+                                remainingBudget < 0 -> Color.Red
+                                budget!= null && remainingBudget <= (budget!! * 0.1) -> Color.Yellow
+                                else -> Color.Green
+                            },
                             modifier = Modifier.padding(bottom = 8.dp)
                         )
                     }
@@ -188,7 +192,7 @@ fun ExpenseScreen(
             } else {
                 LazyColumn(
                     modifier = Modifier.fillMaxSize()
-                        .padding(bottom = if (budget != null && budget != 0.0) 170.dp else 90.dp),
+                        .padding(bottom = if (budget != null && budget != 0.0) 160.dp else 90.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
 
                 ) {
@@ -269,7 +273,7 @@ fun AddExpenseScreen(
             .padding(16.dp),
     ) {
         Column {
-            Spacer(modifier = Modifier.padding(100.dp))
+            Spacer(modifier = Modifier.height(160.dp))
             Text(
                 "Add Expense",
                 style = MaterialTheme.typography.headlineSmall,
@@ -304,27 +308,34 @@ fun AddExpenseScreen(
                 modifier = Modifier.fillMaxWidth()
             )
         }
-        Spacer(modifier = Modifier.padding(20.dp))
+        Spacer(modifier = Modifier.height(20.dp))
+        val context = LocalContext.current
 
+        val amt=amount.toDoubleOrNull()
         Button(
             onClick = {
-                val amt = amount.toDoubleOrNull()
-                if (title.isNotBlank() && category.isNotBlank() && amt != null) {
+
+                if (title.isNotBlank() && category.isNotBlank() && amt != null && amt>0) {
                     viewModel.addExpense(title, category, amt, currentDate)
+                    Toast.makeText(
+                        context,
+                        "Expense Added Successfully",
+                        Toast.LENGTH_SHORT
+                    ).show()
                     navController.popBackStack()
                 }
             },
             modifier = Modifier
                 .fillMaxWidth()
                 .height(48.dp),
-            enabled = title.isNotBlank() && category.isNotBlank() && amount.toDoubleOrNull() != null
+            enabled = title.isNotBlank() && category.isNotBlank() && amt != null && amt>0
         ) {
             Text(
                 "Add Expense",
                 style = MaterialTheme.typography.titleMedium
             )
         }
-        Spacer(modifier = Modifier.padding(10.dp))
+        Spacer(modifier = Modifier.height(10.dp))
         Box(
             modifier = Modifier
                 .fillMaxWidth(),
@@ -360,7 +371,7 @@ fun AddBudgetScreen(repository: BudgetRepository, navController: NavController) 
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Spacer(modifier = Modifier.padding(150.dp))
+        Spacer(modifier = Modifier.height(240.dp))
         Text("Set Monthly Budget", style = MaterialTheme.typography.headlineSmall)
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -373,16 +384,15 @@ fun AddBudgetScreen(repository: BudgetRepository, navController: NavController) 
         )
 
         Spacer(modifier = Modifier.height(16.dp))
-
+        val amount=inputBudget.toDoubleOrNull()
         Button(
             onClick = {
-                val amount = inputBudget.toDoubleOrNull()
-                if (amount != null) {
+                if (amount != null && amount>0) {
                     budgetViewModel.setBudget(currentMonth, amount)
                     navController.popBackStack()
                 }
             },
-            enabled = inputBudget.toDoubleOrNull() != null,
+            enabled = amount != null && amount>0,
             modifier = Modifier
                 .fillMaxWidth()
                 .height(48.dp)
@@ -392,7 +402,7 @@ fun AddBudgetScreen(repository: BudgetRepository, navController: NavController) 
                 style = MaterialTheme.typography.titleMedium
             )
         }
-        Spacer(modifier = Modifier.padding(5.dp))
+        Spacer(modifier = Modifier.height(5.dp))
         Button(
             onClick = {
                 navController.popBackStack()

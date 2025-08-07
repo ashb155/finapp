@@ -1,5 +1,6 @@
 package com.example.financeapp
 
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Text
@@ -72,7 +73,8 @@ sealed class BottomNavScreen(
             screens.forEach { screen ->
                 NavigationBarItem(
                     icon = {},
-                    label = { Text(screen.title) },
+                    label = { Text(screen.title,
+                        style= MaterialTheme.typography.titleSmall) },
                     selected = currentRoute == screen.route,
                     onClick = {
                         if (currentRoute != screen.route) {
