@@ -92,7 +92,7 @@ fun ExpenseScreen(
                     .fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Spacer(modifier=Modifier.padding(40.dp))
+                Spacer(modifier=Modifier.height(40.dp))
                 if (budget != null && budget != 0.0) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Text(
@@ -114,9 +114,11 @@ fun ExpenseScreen(
                         Text(
                             text = "₹${"%.2f".format(remainingBudget)}",
                             style = MaterialTheme.typography.titleLarge,
-                            color = if (remainingBudget >= 0 && remainingBudget>=10*remainingBudget/100) {Color.Green}
-                                    else if (remainingBudget>=0 && remainingBudget<10*remainingBudget/100){Color.Yellow}
-                                    else{Color.Red},
+                            color = when {
+                                remainingBudget < 0 -> Color.Red
+                                budget!= null && remainingBudget <= (budget!! * 0.1) -> Color.Yellow
+                                else -> Color.Green
+                            },
                             modifier = Modifier.padding(bottom = 8.dp)
                         )
                     }
@@ -271,7 +273,7 @@ fun AddExpenseScreen(
             .padding(16.dp),
     ) {
         Column {
-            Spacer(modifier = Modifier.padding(80.dp))
+            Spacer(modifier = Modifier.height(80.dp))
             Text(
                 "Add Expense",
                 style = MaterialTheme.typography.headlineSmall,
@@ -306,13 +308,14 @@ fun AddExpenseScreen(
                 modifier = Modifier.fillMaxWidth()
             )
         }
-        Spacer(modifier = Modifier.padding(20.dp))
+        Spacer(modifier = Modifier.height(20.dp))
         val context = LocalContext.current
 
+        val amt=amount.toDoubleOrNull()
         Button(
             onClick = {
-                val amt = amount.toDoubleOrNull()
-                if (title.isNotBlank() && category.isNotBlank() && amt != null) {
+
+                if (title.isNotBlank() && category.isNotBlank() && amt != null && amt>0) {
                     viewModel.addExpense(title, category, amt, currentDate)
                     Toast.makeText(
                         context,
@@ -325,14 +328,14 @@ fun AddExpenseScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(48.dp),
-            enabled = title.isNotBlank() && category.isNotBlank() && amount.toDoubleOrNull() != null
+            enabled = title.isNotBlank() && category.isNotBlank() && amt != null && amt>0
         ) {
             Text(
                 "Add Expense",
                 style = MaterialTheme.typography.titleMedium
             )
         }
-        Spacer(modifier = Modifier.padding(10.dp))
+        Spacer(modifier = Modifier.height(10.dp))
         Box(
             modifier = Modifier
                 .fillMaxWidth(),
@@ -368,7 +371,7 @@ fun AddBudgetScreen(repository: BudgetRepository, navController: NavController) 
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Spacer(modifier = Modifier.padding(120.dp))
+        Spacer(modifier = Modifier.height(120.dp))
         Text("Set Monthly Budget", style = MaterialTheme.typography.headlineSmall)
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -381,16 +384,15 @@ fun AddBudgetScreen(repository: BudgetRepository, navController: NavController) 
         )
 
         Spacer(modifier = Modifier.height(16.dp))
-
+        val amount=inputBudget.toDoubleOrNull()
         Button(
             onClick = {
-                val amount = inputBudget.toDoubleOrNull()
-                if (amount != null) {
+                if (amount != null && amount>0) {
                     budgetViewModel.setBudget(currentMonth, amount)
                     navController.popBackStack()
                 }
             },
-            enabled = inputBudget.toDoubleOrNull() != null,
+            enabled = amount != null && amount>0,
             modifier = Modifier
                 .fillMaxWidth()
                 .height(48.dp)
@@ -400,7 +402,7 @@ fun AddBudgetScreen(repository: BudgetRepository, navController: NavController) 
                 style = MaterialTheme.typography.titleMedium
             )
         }
-        Spacer(modifier = Modifier.padding(5.dp))
+        Spacer(modifier = Modifier.height(5.dp))
         Button(
             onClick = {
                 navController.popBackStack()
