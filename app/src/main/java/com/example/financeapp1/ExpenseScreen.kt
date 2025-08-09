@@ -33,6 +33,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -48,6 +49,8 @@ import com.example.financeapp1.viewmodels.BudgetViewModel
 import com.example.financeapp1.viewmodels.BudgetViewModelFactory
 import com.example.financeapp1.viewmodels.ExpenseViewModel
 import com.example.financeapp1.viewmodels.ExpenseViewModelFactory
+import generateExpensePdf
+import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.time.LocalDate
 import java.util.Date
@@ -159,6 +162,27 @@ fun ExpenseScreen(
                             else{
                                 "Set Budget"
                             },
+                            style = MaterialTheme.typography.titleSmall
+                        )
+                    }
+                    val coroutineScope = rememberCoroutineScope()
+                    val context = LocalContext.current
+
+                    FloatingActionButton(
+                        onClick = { coroutineScope.launch {
+                            val pdfPath=generateExpensePdf(expenses)
+                            if (pdfPath != null) {
+                                Toast.makeText(context, "PDF saved at:\n$pdfPath", Toast.LENGTH_LONG).show()
+                            } else {
+                                Toast.makeText(context, "Failed to generate PDF", Toast.LENGTH_SHORT).show()
+                            }
+                        } },
+                        modifier = Modifier
+                            .width(120.dp)
+                            .height(50.dp)
+                    ) {
+                        Text(
+                            "Export PDF",
                             style = MaterialTheme.typography.titleSmall
                         )
                     }
