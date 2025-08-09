@@ -105,7 +105,7 @@ fun CurrencyScreen(
             ) {
                 Text(
                     "No Internet Connection",
-                    style = MaterialTheme.typography.headlineMedium,
+                    style = MaterialTheme.typography.headlineSmall,
                     color = MaterialTheme.colorScheme.error,
                     textAlign = TextAlign.Center
                 )
@@ -121,7 +121,8 @@ fun CurrencyScreen(
                         noInternet = false
                     }
                 }) {
-                    Text("Try Again")
+                    Text("Try Again",
+                        style=MaterialTheme.typography.titleSmall)
                 }
             }
             return@Column
@@ -183,46 +184,53 @@ fun CurrencyScreen(
 
         error?.let {
             Text(
-                text = "Error: $it",
+
+                text = "Error: Something Went Wrong",
+                modifier=Modifier.fillMaxWidth(),
+                textAlign = TextAlign.Center,
                 color = MaterialTheme.colorScheme.error,
-                style = MaterialTheme.typography.bodyMedium
+                style = MaterialTheme.typography.titleLarge
             )
         }
+        if(error==null) {
+            displayedConversionRate?.let { rate ->
+                val amount = amountInput.toDoubleOrNull() ?: return@let
+                val converted = rate * amount
 
-        displayedConversionRate?.let { rate ->
-            val amount = amountInput.toDoubleOrNull() ?: return@let
-            val converted = rate * amount
-
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 8.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.8f)
-                ),
-                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-            ) {
-                Column(
+                Card(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(16.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
+                        .padding(top = 8.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.8f)
+                    ),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
                 ) {
-                    Text(
-                        "$amountInput $displayedFromCurrency = %.2f $displayedToCurrency".format(converted),
-                        style = MaterialTheme.typography.titleMedium,
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Button(onClick = {
-                        viewModel.addFavorite(displayedFromCurrency, displayedToCurrency)
-                    }) {
-                        Text("Add to Favorites",
-                            style=MaterialTheme.typography.titleSmall)
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            "$amountInput $displayedFromCurrency = %.2f $displayedToCurrency".format(
+                                converted
+                            ),
+                            style = MaterialTheme.typography.titleMedium,
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Button(onClick = {
+                            viewModel.addFavorite(displayedFromCurrency, displayedToCurrency)
+                        }) {
+                            Text(
+                                "Add to Favorites",
+                                style = MaterialTheme.typography.titleSmall
+                            )
+                        }
                     }
                 }
             }
         }
-
         Spacer(modifier = Modifier.height(16.dp))
 
         FavoritePairsList(
@@ -271,7 +279,8 @@ fun FavoritePairsList(
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)
                     ) {
-                        Text("${favorite.fromCurrency} → ${favorite.toCurrency}")
+                        Text("${favorite.fromCurrency} → ${favorite.toCurrency}",
+                            style=MaterialTheme.typography.titleLarge)
                         Spacer(modifier = Modifier.width(8.dp))
                         IconButton(onClick = { onRemove(favorite) }) {
                             Icon(Icons.Default.Delete, contentDescription = "Remove Favorite")
