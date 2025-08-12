@@ -18,6 +18,8 @@ class CurrencyViewModel(
     val isLoading: StateFlow<Boolean> = CurrencyRepository.isLoading
     val error: StateFlow<String?> = CurrencyRepository.error
 
+    val currencyCodes = CurrencyRepository.currencyCodes
+
     val favorites: StateFlow<List<FavoritePairEntity>> = repository.favorites
         .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
 
@@ -26,6 +28,12 @@ class CurrencyViewModel(
             CurrencyRepository.fetchConversionRate(from, to)
         }
     }
+    fun fetchCurrencyCodes() {
+        viewModelScope.launch {
+            CurrencyRepository.fetchCurrencyCodes()
+        }
+    }
+
 
     fun addFavorite(from: String, to: String) {
         viewModelScope.launch {

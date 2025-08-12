@@ -19,7 +19,6 @@ private val DarkColorScheme= darkColorScheme(
     onSurface = Color(0xFFE1E1E1),
     error = Color(0xFFA44859),
     onError =Color(0xFFCF6679)
-
 )
 
 private val AppShapes=Shapes()

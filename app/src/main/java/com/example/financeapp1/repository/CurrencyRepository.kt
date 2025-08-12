@@ -17,6 +17,9 @@ object CurrencyRepository {
     val isLoading = MutableStateFlow(false)
     val error = MutableStateFlow<String?>(null)
 
+    val currencyCodes = MutableStateFlow<List<Pair<String, String>>>(emptyList())
+
+
     suspend fun fetchConversionRate(from: String, to: String) {
         isLoading.value = true
         try {
@@ -37,4 +40,19 @@ object CurrencyRepository {
             isLoading.value = false
         }
     }
+    suspend fun fetchCurrencyCodes() {
+        try {
+            val response = withContext(Dispatchers.IO) {
+                apiService.getCurrencyCodes(apiKey)
+            }
+            if (response.result == "success") {
+                currencyCodes.value = response.supported_codes.map { Pair(it[0], it[1]) }
+            } else {
+                currencyCodes.value = emptyList()
+            }
+        } catch (e: Exception) {
+            currencyCodes.value = emptyList()
+        }
+    }
+
 }
