@@ -20,3 +20,8 @@ data class CurrencyResponse(
     val conversionRate: Double
 )
 
+
+data class CurrencyCodesResponse(
+    val result: String,
+    val supported_codes: List<List<String>>
+)
